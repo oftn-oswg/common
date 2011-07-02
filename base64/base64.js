@@ -1,6 +1,4 @@
-var Base64;
-
-Base64 = {
+var Base64 = {
 
 	rank: new Uint8Array([
 		  62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1
@@ -17,9 +15,11 @@ Base64 = {
 		,119,120,121,122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 43, 47
 	]),
 
-	encode: function(binary) {
+	encode: function(data) {
+		"use strict";
+		
 		var
-			  len = binary.length
+			  len = data.length
 			, alphabet = Base64.alphabet
 			, buffer = new Uint8Array((len / 3 + 1) * 4 | 0)
 			, ip = 0
@@ -34,7 +34,7 @@ Base64 = {
 			
 			for (var a = 0; a < 3; a++) {
 				if (len) {
-					ibuf[a] = binary[ip++];
+					ibuf[a] = data[ip++];
 					bs++;
 					len--;
 				} else {
@@ -55,12 +55,14 @@ Base64 = {
 			}
 		}
 		
-		return String.fromCharCode.apply(String, buffer.subarray(0, op));
+		return buffer.subarray(0, op);
 	},
 
-	decode: function(string) {
+	decode: function(base64) {
+		"use strict";
+		
 		var
-			  len = string.length
+			  len = base64.length
 			, buffer = new Uint8Array(len / 4 * 3 | 0)
 			, ranks = Base64.rank
 			, i = 0
@@ -72,7 +74,7 @@ Base64 = {
 			, code;
 		
 		while (len--) {
-			code = string.charCodeAt(i++);
+			code = base64[i++];
 			rank = ranks[code-43];
 			if (rank !== 255 && rank !== void 0) {
 				last[1] = last[0];
