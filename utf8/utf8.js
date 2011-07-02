@@ -3,10 +3,10 @@ var Utf8 = {
 	encode: function(string) {
 		var
 			  value = String(string)
-			, len = value.length
+			, inputlength = value.length
 			, code
-			, code2
-			, wc
+			, codehi
+			, character
 			, bytes = 0
 			, buffer
 			, ip = 0
@@ -17,7 +17,7 @@ var Utf8 = {
 		// First we need to perform a check to see the string is valid, and
 		// compute the total length of the encoded data
 		
-		while (len--) {
+		while (inputlength--) {
 			code = value.charCodeAt(ip++);
 			
 			if (code >= 0xDC00 && code <= 0xDFFF) {
@@ -25,64 +25,65 @@ var Utf8 = {
 					"Invalid sequence in conversion input");
 					
 			} else if (code >= 0xD800 && code <= 0xDBFF) {
-				if (len < 1) {
+				if (inputlength < 1) {
 					throw new Error(
 						"Partial character sequence at end of input");
+						
 				} else {
-					code2 = value.charCodeAt(ip++);
-					if ((code2 < 0xDC00) || (code2 > 0xDFFF)) {
+					codehi = value.charCodeAt(ip++);
+					if ((codehi < 0xDC00) || (codehi > 0xDFFF)) {
 						throw new Error(
 							"Invalid sequence in conversion input");
 							
 					} else {
-						wc = ((code2) - 0xd800) * 0x400 +
+						character = ((codehi) - 0xd800) * 0x400 +
 						      (code) - 0xdc00 + 0x10000;
 					}
-					len--;
+					inputlength--;
 				}
 			} else {
-				wc = code;
+				character = code;
 			}
-			bytes += ((wc) < 0x80 ? 1 :
-				((wc) < 0x800 ? 2 :
-					((wc) < 0x10000 ? 3 :
-						((wc) < 0x200000 ? 4 :
-							((wc) < 0x4000000 ? 5 : 6)))));
+			bytes += ((character) < 0x80 ? 1 :
+				((character) < 0x800 ? 2 :
+					((character) < 0x10000 ? 3 :
+						((character) < 0x200000 ? 4 :
+							((character) < 0x4000000 ? 5 : 6)))));
 		}
 		
 		// Now we know the string is valid and we re-iterate.
 		
 		buffer = new Uint8Array(bytes);
-		len = value.length;
+		inputlength = value.length;
 		ip = 0;
 		
-		while (len--) {
+		while (inputlength--) {
 			code = value.charCodeAt(ip++);
 			
 			if (code >= 0xD800 && code <= 0xDBFF) {
-				code2 = value.charCodeAt(ip++);
-				wc = ((code2) - 0xd800) * 0x400 +
+				codehi = value.charCodeAt(ip++);
+				character = ((codehi) - 0xd800) * 0x400 +
 				      (code) - 0xdc00 + 0x10000;
-				len--;
+				inputlength--;
 			} else {
-				wc = code;
+				character = code;
 			}
 			
 			size = 0;
 
-			if (wc < 0x80) {
+			if (character < 0x80) {
 				first = 0;
 				size = 1;
-			} else if (wc < 0x800) {
+			} else if (character < 0x800) {
 				first = 0xc0;
 				size = 2;
-			} else if (wc < 0x10000) {
+			} else if (character < 0x10000) {
 				first = 0xe0;
 				size = 3;
-			} else if (wc < 0x200000) {
+			} else if (character < 0x200000) {
 				first = 0xf0;
 				size = 4;
-			} else if (wc < 0x4000000) {
+			} else if (character < 0x4000000) {
 				first = 0xf8;
 				size = 5;
 			} else {
@@ -90,11 +91,11 @@ var Utf8 = {
 				size = 6;
 			}
 
-			for (var i = size - 1; i > 0; --i) {
-				buffer[op + i] = (wc & 0x3f) | 0x80;
-				wc >>= 6;
+			for (var i = op + size - 1; i > op; i--) {
+				buffer[i] = (character & 0x3f) | 0x80;
+				character >>= 6;
 			}
-			buffer[op] = wc | first;
+			buffer[op] = character | first;
 			op += size;
 
 		}
