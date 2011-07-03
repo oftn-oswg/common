@@ -104,6 +104,68 @@ var Utf8 = {
 		
 	},
 	
+	get_utf8_char: function(data, index) {
+		var
+			  code = data[index]
+			, size = 0
+			, min_code = 0;
+			
+		if (code < 0x80) {
+		
+		} else if (code < 0xc0) {
+			throw new Error("Invalid byte sequence in conversion input");
+			
+		} else if (code < 0xe0) {
+			size = 2;
+			code &= 0x1f;
+			min_code = 1 << 7;
+			
+		} else if (code < 0xf0) {
+			size = 3;
+			code &= 0x0f;
+			min_code = 1 << 11;
+			
+		} else if (code < 0xf8) {
+			size = 4;
+			code &= 0x07;
+			min_code = 1 << 16;
+			
+		} else if (code < 0xfc) {
+			size = 5;
+			code &= 0x03;
+			min_code = 1 << 21;
+			
+		} else if (code < 0xfe) {
+			size = 6;
+			code &= 0x01;
+			min_code = 1 << 26;
+			
+		} else {
+			throw new Error("Invalid byte sequence in conversion input");
+		}
+		
+		for (i = 1; i < size; i++) {
+			ch = data[index+i];
+			
+			if (ch === void 0) {
+				throw new Error("Partial character sequence at end of input");
+			}
+
+			if (ch & 0xc0) != 0x80) {
+				throw new Error("Invalid byte sequence in conversion input");
+			}
+
+			code <<= 6;
+			code |= (ch & 0x3f);
+		}
+
+		if (code < min_code) {
+			throw new Error("Invalid byte sequence in conversion input");
+		}
+		
+		return code;
+	},
+	
 	decode: function(data) {
 		throw new Error("Utf8.decode is not implemented");
 	}
