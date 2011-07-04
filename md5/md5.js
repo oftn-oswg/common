@@ -1,38 +1,49 @@
-var MD5 = function(data) {
+var MD5 = function(data, byteOffset, byteLength) {
 	"use strict";
+
+	if (Object.prototype.toString.call(data) !== "ArrayBuffer")
+		throw new TypeError("First argument must be an ArrayBuffer");
 
 	var
 		  checksum_h = new Uint32Array([0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476])
-		, input = data.buffer
-		, input_bytelength = input.byteLength
-		, input_lastlength = input_bytelength & 63 /* mod 64 */
-		, block_num = input_bytelength / 64 + 1 | 0
+		, input = data
+		, input_byteoffset = byteOffset || 0
+		, input_bytelength = byteLength || data.byteLength
+		, input_minlength = input_bytelength + 9
+		, input_trailing = input_bytelength & 63
+		, block_offset = input_byteoffset
+		, block_num = input_minlength / 64 + 1 | 0
 		, block_i = 0
 		, i_uint8
 		, i, b;
 	
 	while (block_num--) {
-		
-		if (!block_num) {
-			
-			// FIXME: This hash function is incorrect since it pads the message
-			// length (in bits) to 512 mod 512 instead of 448 mod 512. This only
-			// works in cases where the input is already less than 448 mod 512
-			// bits in length.
+	
+		if (block_offset + 64 > input_bytelength) {
 			
 			i = new Uint32Array(16);
 			i_uint8 = Uint8Array(i.buffer);
 			
-			i_uint8.set(Uint8Array(input, 64 * block_i++, input_lastlength));
-			i_uint8[input_lastlength] |= 0x80;
+			if (input_trailing > 0) {
+				i_uint8.set(Uint8Array(input, block_offset, input_trailing));
+			}
 			
-			i[14] = input_bytelength << 3;
+			if (input_trailing >= 0) {
+				i_uint8[input_trailing] |= 0x80;
+			}
+			
+			if (!block_num) {
+				i[14] = input_bytelength << 3;
+			} else {
+				input_trailing -= 64;
+			}
 			
 		} else {
-			i = new Uint32Array(input, 128 * block_i++, 16);
+			i = new Uint32Array(input, block_offset, 16);
 		}
 		
 		b = new Uint32Array(checksum_h);
+		block_offset += 64;
 		
 		b[0] += (b[3] ^ (b[1] & (b[2] ^ b[3]))) + (i[0]  + 0xd76aa478 >>> 0); b[0] = b[0] << 7  | b[0] >>> 25; b[0] += b[1];
 		b[3] += (b[2] ^ (b[0] & (b[1] ^ b[2]))) + (i[1]  + 0xe8c7b756 >>> 0); b[3] = b[3] << 12 | b[3] >>> 20; b[3] += b[0];
