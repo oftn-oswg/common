@@ -1,25 +1,26 @@
 var MD5 = function(data, byteOffset, byteLength) {
 	"use strict";
-
+	
 	if (Object.prototype.toString.call(data) !== "[object ArrayBuffer]")
 		throw new TypeError("First argument must be an ArrayBuffer");
-
+	
+	byteOffset >>>= 0;
+	byteLength = (typeof byteLength !== "undefined" ?
+		byteLength >>> 0 : data.byteLength - byteOffset);
+	
 	var
 		  checksum_h = new Uint32Array([0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476])
 		, input = data
-		, input_byteoffset = byteOffset >>> 0 || 0
-		, input_bytelength = byteLength >>> 0 || input.byteLength
-		, input_minlength = input_bytelength + 9
-		, input_trailing = input_bytelength & 63
-		, block_offset = input_byteoffset
-		, block_num = input_minlength / 64 + 1 | 0
+		, input_trailing = byteLength & 63
+		, block_offset = byteOffset
+		, block_num = (byteLength + 9) / 64 + 1 | 0
 		, block_i = 0
 		, i_uint8
 		, i, b;
 	
 	while (block_num--) {
 	
-		if (block_offset + 64 > input_bytelength) {
+		if (block_offset + 64 > byteLength) {
 			
 			i = new Uint32Array(16);
 			i_uint8 = Uint8Array(i.buffer);
@@ -33,7 +34,7 @@ var MD5 = function(data, byteOffset, byteLength) {
 			}
 			
 			if (!block_num) {
-				i[14] = input_bytelength << 3;
+				i[14] = byteLength << 3;
 			} else {
 				input_trailing -= 64;
 			}

@@ -1,4 +1,4 @@
-var Utf8 = {
+var UTF8 = {
 
 	encode: function(string) {
 		var
@@ -151,7 +151,7 @@ var Utf8 = {
 				throw new Error("Partial character sequence at end of input");
 			}
 
-			if (ch & 0xc0) != 0x80) {
+			if ((ch & 0xc0) != 0x80) {
 				throw new Error("Invalid byte sequence in conversion input");
 			}
 

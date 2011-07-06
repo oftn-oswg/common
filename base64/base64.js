@@ -15,52 +15,59 @@ var Base64 = {
 		,119,120,121,122, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 43, 47
 	]),
 
-	encode: function(data) {
+	encode: function(data, byteOffset, byteLength) {
 		"use strict";
 		
+		if (Object.prototype.toString.call(data) !== "[object ArrayBuffer]")
+			throw new TypeError("First argument must be an ArrayBuffer");
+		
+		byteOffset >>>= 0;
+		byteLength = (typeof byteLength !== "undefined" ?
+			byteLength >>> 0 : data.byteLength - byteOffset);
+		
 		var
-			  len = data.length
-			, alphabet = Base64.alphabet
-			, buffer = new Uint8Array((len / 3 + 1) * 4 | 0)
+			  alphabet = Base64.alphabet
+			, input = new Uint8Array(data, byteOffset, byteLength)
+			, output = new Uint8Array((byteLength / 3 + 1) * 4 | 0)
 			, ip = 0
 			, op = 0
-			, ibuf = [0, 0, 0]
-			, bs
+			, buffer = [0, 0, 0]
+			, size
 			, code;
 		
-		while (len) {
-		
-			bs = 0;
+		while (byteLength) {
+			
+			size = 0;
 			
 			for (var a = 0; a < 3; a++) {
-				if (len) {
-					ibuf[a] = data[ip++];
-					bs++;
-					len--;
+				if (byteLength) {
+					size++;
+					byteLength--;
+					buffer[a] = input[ip++];
 				} else {
-					ibuf[a] = 0;
+					buffer[a] = 0;
 				}
 			}
 			
-			if (bs) {
-				buffer[op++] = alphabet[ibuf[0] >> 2];
-				buffer[op++] =
-					alphabet[((ibuf[0] & 0x03) << 4) |
-						((ibuf[1] & 0xf0) >> 4)];
-				buffer[op++] = (bs > 1 ?
-					alphabet[((ibuf[1] & 0x0f) << 2) |
-						((ibuf[2] & 0xc0) >> 6)] : 61);
-				buffer[op++] = (bs > 2 ?
-					alphabet[ibuf[2] & 0x3f] : 61);
+			if (size) {
+				output[op++] = alphabet[buffer[0] >> 2];
+				output[op++] =
+					alphabet[((buffer[0] & 0x03) << 4) |
+						((buffer[1] & 0xf0) >> 4)];
+				output[op++] = (size > 1 ?
+					alphabet[((buffer[1] & 0x0f) << 2) |
+						((buffer[2] & 0xc0) >> 6)] : 61);
+				output[op++] = (size > 2 ?
+					alphabet[buffer[2] & 0x3f] : 61);
 			}
 		}
 		
-		return buffer.subarray(0, op);
+		return output.subarray(0, op);
 	},
 
 	decode: function(base64) {
 		"use strict";
-		
+	
 		var
 			  len = base64.length
 			, buffer = new Uint8Array(len / 4 * 3 | 0)
@@ -72,7 +79,7 @@ var Base64 = {
 			, save = 0
 			, rank
 			, code;
-		
+	
 		while (len--) {
 			code = base64[i++];
 			rank = ranks[code-43];
