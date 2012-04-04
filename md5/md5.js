@@ -23,10 +23,10 @@ var MD5 = function(data, byteOffset, byteLength) {
 		if (block_offset + 64 > byteLength) {
 			
 			i = new Uint32Array(16);
-			i_uint8 = Uint8Array(i.buffer);
+			i_uint8 = new Uint8Array(i.buffer);
 			
 			if (input_trailing > 0) {
-				i_uint8.set(Uint8Array(input, block_offset, input_trailing));
+				i_uint8.set(new Uint8Array(input, block_offset, input_trailing));
 			}
 			
 			if (input_trailing >= 0) {

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MD5 tests</title>
+<style>
+body {
+	background-color: #333;
+	color: #eee;
+	font-family: monospace;
+	font-size: 20px;
+}
+textarea {
+	font-family: inherit;
+	font-size: inherit;
+	background-color: transparent;
+	color: inherit;
+	border: 1px solid white;
+	width: 100%;
+}
+div {
+	margin: 1em;
+}
+</style>
+</head>
+<body>
+	<h1>MD5 Tester</h1>
+	<div>
+		<h2>Input</h2>
+		<textarea id="in" onkeyup="Test.update()"></textarea>
+	</div>
+	<div>
+		<h2>Output</h2>
+		<textarea id="out"></textarea>
+	</div>
+<script type="text/javascript" src="../utf8/utf8.js"></script>
+<script type="text/javascript" src="md5.js"></script>
+<script type="text/javascript">
+var Test = {
+	update: function () {
+		var i = document.getElementById ("in");
+		var o = document.getElementById ("out");
+
+		o.value = this.calc (i.value);
+	},
+	calc: function (string) {
+		var array = Array.prototype.slice.call (MD5 (UTF8.encode (string).buffer));
+		return array.map (function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join ("");
+	}
+};
+
+Test.update ();
+</script>
+</body>
+</html>
