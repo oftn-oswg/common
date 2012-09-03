@@ -9,18 +9,18 @@ base64
 
 ### Base64.encode(data, [byteOffset], [byteLength])
 
-data: An ArrayBuffer object
-byteOffset: optional byteOffset to start at (default: 0)
-byteLength: optional byteLength to end at (default: data.byteLength)
+Returns a Uint8Array of character codes of the base64 string.
 
-returns: Uint8Array of character codes of the base64 string
-You can possibly convert it into a string with: `String.fromCharCode.apply(String, return_value)`
+ - `data`: An ArrayBuffer object
+ - `byteOffset`: An optional offset used as the start of the buffer (default: 0)
+ - `byteLength`: An optional length of data used to find the end (default: data.byteLength)
 
 ### Base64.decode(array)
 
-array: Array of character codes of a base64 string
+Returns a Uint8Array of the byte stream (should really be ArrayBuffer).
 
-returns: Uint8Array of the byte stream
+ - `array`: Array of character codes of a base64 string (should really be a JavaScript string).
+
 
 
 Data checksums
@@ -30,19 +30,33 @@ Data checksums
 
 	MD5(data, [byteOffset], [byteLength])
 
-data: An ArrayBuffer object
-byteOffset: optional byteOffset to start at (default: 0)
-byteLength: optional byteLength to end at (default: data.byteLength)
+Returns a computed hash of data as Uint8Array of 16 bytes
 
-returns: Computed hash of data as Uint8Array of 16 bytes
+The arguments have the same meaning as listed above.
+
 
 ### sha256
 
 	SHA256(data, [byteOffset], [byteLength])
 
-The arguments are the same as listed above.
+Returns a computed hash of data as Uint8Array of 32 bytes
 
-returns: Computed hash of data as Uint8Array of 32 bytes
+The arguments have the same meaning as listed above.
+
+
+Encodings
+---------
+
+### UTF8.encode(string)
+
+Returns an ArrayBuffer of the UTF8-encoded string
+
+ - `string`: A JavaScript string
+
+
+### UTF8.decode(...)
+
+Not implemented!
 
 
 spelling
@@ -51,20 +65,6 @@ spelling
 Look at the end of the file `spelling.js` for an example usage with Node.js.
 
 
-
-Encodings
----------
-
-### UTF8.encode(string)
-
-string: A JavaScript string
-
-returns: ArrayBuffer of UTF8-encoded string
-
-
-### UTF8.decode(...)
-
-Not implemented.
 
 ## License
 
