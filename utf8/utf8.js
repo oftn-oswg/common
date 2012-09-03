@@ -8,7 +8,7 @@ var UTF8 = {
 			, codehi
 			, character
 			, bytes = 0
-			, buffer
+			, byte_array
 			, ip = 0
 			, op = 0
 			, size
@@ -53,7 +53,7 @@ var UTF8 = {
 		
 		// Now we know the string is valid and we re-iterate.
 		
-		buffer = new Uint8Array(bytes);
+		byte_array = new Uint8Array(bytes);
 		inputlength = value.length;
 		ip = 0;
 		
@@ -92,15 +92,15 @@ var UTF8 = {
 			}
 
 			for (var i = op + size - 1; i > op; i--) {
-				buffer[i] = (character & 0x3f) | 0x80;
+				byte_array[i] = (character & 0x3f) | 0x80;
 				character >>= 6;
 			}
-			buffer[op] = character | first;
+			byte_array[op] = character | first;
 			op += size;
 
 		}
 		
-		return buffer;
+		return byte_array.buffer;
 		
 	},
 	

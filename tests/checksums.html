@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Checksums</title>
+<style>
+body {
+	background-color: #333;
+	color: #eee;
+	font-family: monospace;
+	font-size: 20px;
+}
+textarea {
+	font-family: inherit;
+	font-size: inherit;
+	background-color: transparent;
+	color: inherit;
+	border: 1px solid white;
+	width: 100%;
+}
+div {
+	margin: 1em;
+}
+</style>
+</head>
+<body>
+	<h1>Checksums</h1>
+	<div>
+		<h2>Input</h2>
+		<textarea id="in" onkeyup="Test.update()"></textarea>
+	</div>
+	<div>
+		<h2>Output</h2>
+		<select id="selection"></select>
+		<textarea id="out"></textarea>
+	</div>
+<script type="text/javascript" src="../utf8/utf8.js"></script>
+<script type="text/javascript" src="../md5/md5.js"></script>
+<script type="text/javascript" src="../sha256/sha256.js"></script>
+<script type="text/javascript">
+
+var MD5, SHA256;
+
+var Test = {
+	selections: [
+		{ name: "md5", impl: MD5 },
+		{ name: "sha256", impl: SHA256 }
+	],
+	update: function () {
+		var i = this.id ("in");
+		var o = this.id ("out");
+
+		o.value = this.calc (i.value);
+	},
+	calc: function (string) {
+		var impl = this.selections[this.id ("selection").selectedIndex];
+		if (impl) {
+			impl = impl.impl;
+		}
+
+		if (impl) {
+			var array = Array.prototype.slice.call (impl (UTF8.encode (string)));
+			return array.map (function(v) { return (v < 16 ? '0' : '') + v.toString(16); }).join ("");
+		} else {
+			return "Not defined.";
+		}
+	},
+	id: function (id) {
+		return document.getElementById (id);
+	},
+	init: function() {
+		var self = this, sel = this.id ("selection");
+		while (sel.lastChild) {
+			sel.removeChild(sel.lastChild);
+		}
+		sel.onchange = function () {
+			self.update ();
+		}
+
+		for (var i = 0, len = this.selections.length; i < len; i++) {
+			var opt = document.createElement ("option");
+			opt.value = i;
+			opt.appendChild (document.createTextNode (this.selections[i].name));
+			sel.appendChild (opt);
+		}
+
+		this.update();
+	}
+};
+
+Test.init ();
+</script>
+</body>
+</html>
